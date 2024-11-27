@@ -1,0 +1,5 @@
+/home/simp/Code/c#/klerapiano/obj/Debug/net6.0/klerapiano.GeneratedMSBuildEditorConfig.editorconfig
+/home/simp/Code/c#/klerapiano/obj/Debug/net6.0/klerapiano.AssemblyInfoInputs.cache
+/home/simp/Code/c#/klerapiano/obj/Debug/net6.0/klerapiano.AssemblyInfo.cs
+/home/simp/Code/c#/klerapiano/obj/Debug/net6.0/klerapiano.csproj.CoreCompileInputs.cache
+/home/simp/Code/c#/klerapiano/obj/Debug/net6.0/klerapiano.csproj.AssemblyReference.cache

@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/simp/Code/c#/klerapiano/klerapiano.csproj": {}
+  },
+  "projects": {
+    "/home/simp/Code/c#/klerapiano/klerapiano.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/simp/Code/c#/klerapiano/klerapiano.csproj",
+        "projectName": "klerapiano",
+        "projectPath": "/home/simp/Code/c#/klerapiano/klerapiano.csproj",
+        "packagesPath": "/home/simp/.nuget/packages/",
+        "outputPath": "/home/simp/Code/c#/klerapiano/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/simp/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "CSCore": {
+              "target": "Package",
+              "version": "[1.2.1.2, )"
+            },
+            "ManagedBass": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            },
+            "NAudio": {
+              "target": "Package",
+              "version": "[2.2.1, )"
+            },
+            "PortAudioSharp": {
+              "target": "Package",
+              "version": "[0.3.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.10, 8.0.10]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.110/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
