@@ -1,119 +1,125 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 
-namespace KleraPiano
+Dictionary<ConsoleKey, string> KeyToNoteMap = new()
 {
-    class PianoApp
+    { ConsoleKey.A, "C" },
+    { ConsoleKey.S, "D" },
+    { ConsoleKey.D, "E" },
+    { ConsoleKey.F, "F" },
+    { ConsoleKey.G, "G" },
+    { ConsoleKey.H, "A" },
+    { ConsoleKey.J, "B" }
+};
+
+Dictionary<string, double> NoteToFrequencyMap = new()
+{
+    { "C", 261.63 }, // C4
+    { "D", 293.66 }, // D4
+    { "E", 329.63 }, // E4
+    { "F", 349.23 }, // F4
+    { "G", 392.00 }, // G4
+    { "A", 440.00 }, // A4
+    { "B", 493.88 }  // B4
+};
+
+// Shared WaveOutEvent and WaveProvider
+WaveOutEvent waveOut = new WaveOutEvent();
+BufferedWaveProvider bufferProvider;
+
+DisplayPiano();
+DisplayKeyMapping();
+
+Console.WriteLine("Press F1 for help or keys A, S, D, F, G, H, J to play notes. Press ESC to quit.");
+
+bool running = true;
+while (running)
+{
+    ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+
+    if (keyInfo.Key == ConsoleKey.Escape)
     {
-        private static readonly Dictionary<ConsoleKey, string> KeyToNoteMap = new()
-        {
-            { ConsoleKey.A, "A" },
-            { ConsoleKey.S, "B" },
-            { ConsoleKey.D, "C" },
-            { ConsoleKey.F, "D" },
-            { ConsoleKey.G, "E" },
-            { ConsoleKey.H, "F" },
-            { ConsoleKey.J, "G" }
-        };
-
-        private static readonly Dictionary<string, string> NoteToSoundFileMap = new()
-        {
-            { "C", "C.wav" },
-            { "D", "D.wav" },
-            { "E", "E.wav" },
-            { "F", "F.wav" },
-            { "G", "G.wav" },
-            { "A", "A.wav" },
-            { "B", "B.wav" }
-        };
-
-        static void Main(string[] args)
-        {
-            DisplayPiano();
-            DisplayKeyMapping();
-
-            Console.WriteLine("Stiskněte F1 pro zobrazení nápovědy nebo klávesy A, S, D, F, G, H, J pro hraní not. Stiskněte ESC pro ukončení.");
-
-            bool running = true;
-            while (running)
-            {
-                ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
-
-                if (keyInfo.Key == ConsoleKey.Escape)
-                {
-                    running = false;
-                }
-                else if (keyInfo.Key == ConsoleKey.F1)
-                {
-                    DisplayHelp();
-                }
-                else if (KeyToNoteMap.ContainsKey(keyInfo.Key))
-                {
-                    PlayNoteForKey(keyInfo.Key);
-                }
-                else
-                {
-                    Console.WriteLine("Neplatná klávesa.");
-                }
-            }
-        }
-
-        private static void DisplayPiano()
-        {
-            Console.Clear();
-            Console.WriteLine("Virtuální Piano");
-            Console.WriteLine("| C | D | E | F | G | A | B |");
-            Console.WriteLine("|---|---|---|---|---|---|---|");
-            Console.WriteLine("|   | # |   | # |   | # |   |");
-        }
-
-        private static void DisplayKeyMapping()
-        {
-            Console.WriteLine("\nMapa kláves:");
-            Console.WriteLine("A -> C");
-            Console.WriteLine("S -> D");
-            Console.WriteLine("D -> E");
-            Console.WriteLine("F -> F");
-            Console.WriteLine("G -> G");
-            Console.WriteLine("H -> A");
-            Console.WriteLine("J -> B");
-        }
-
-        private static void DisplayHelp()
-        {
-            Console.WriteLine("\nNápověda:");
-            Console.WriteLine("Použijte klávesy A, S, D, F, G, H, J pro hraní not.");
-            Console.WriteLine("Stiskněte ESC pro ukončení.");
-        }
-
-        private static void PlayNoteForKey(ConsoleKey key)
-        {
-            if (KeyToNoteMap.TryGetValue(key, out string note))
-            {
-                Console.WriteLine($"Hraje nota: {note}");
-                PlaySound(NoteToSoundFileMap[note]);
-            }
-        }
-
-        private static void PlaySound(string filePath)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "ffplay",
-                    Arguments = $"-nodisp -autoexit {filePath}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Chyba při přehrávání souboru {filePath}: {ex.Message}");
-            }
-        }
+        running = false;
     }
+    else if (keyInfo.Key == ConsoleKey.F1)
+    {
+        DisplayHelp();
+    }
+    else if (KeyToNoteMap.ContainsKey(keyInfo.Key))
+    {
+        PlayNoteForKey(keyInfo.Key);
+    }
+    else
+    {
+        Console.WriteLine("Invalid key.");
+    }
+}
+
+void DisplayPiano()
+{
+    Console.Clear();
+    Console.WriteLine("Virtual Piano");
+    Console.WriteLine("| C | D | E | F | G | A | B |");
+    Console.WriteLine("|---|---|---|---|---|---|---|");
+    Console.WriteLine("|   | # |   | # |   | # |   |");
+}
+
+void DisplayKeyMapping()
+{
+    Console.WriteLine("\nKey Mapping:");
+    Console.WriteLine("A -> C");
+    Console.WriteLine("S -> D");
+    Console.WriteLine("D -> E");
+    Console.WriteLine("F -> F");
+    Console.WriteLine("G -> G");
+    Console.WriteLine("H -> A");
+    Console.WriteLine("J -> B");
+}
+
+void DisplayHelp()
+{
+    Console.WriteLine("\nHelp:");
+    Console.WriteLine("Use keys A, S, D, F, G, H, J to play notes.");
+    Console.WriteLine("Press ESC to quit.");
+}
+
+void PlayNoteForKey(ConsoleKey key)
+{
+    if (KeyToNoteMap.TryGetValue(key, out string? note) && NoteToFrequencyMap.TryGetValue(note, out double frequency))
+    {
+        // Stop any currently playing note
+        waveOut.Stop();
+
+        // Create a new buffer and generate the tone
+        bufferProvider = GenerateToneBuffer(frequency, 44100, 500);
+        waveOut.Init(bufferProvider);
+        waveOut.Play();
+
+        Console.WriteLine($"Playing note: {note}");
+    }
+}
+
+BufferedWaveProvider GenerateToneBuffer(double frequency, int sampleRate, int durationMs)
+{
+    WaveFormat waveFormat = new WaveFormat(sampleRate, 16, 1);
+    var buffer = new BufferedWaveProvider(waveFormat);
+
+    int samplesToGenerate = (int)(sampleRate * (durationMs / 1000.0));
+    short[] sampleBuffer = new short[samplesToGenerate];
+
+    for (int i = 0; i < sampleBuffer.Length; i++)
+    {
+        double t = (double)i / sampleRate;
+        sampleBuffer[i] = (short)(Math.Sin(2 * Math.PI * frequency * t) * short.MaxValue);
+    }
+
+    byte[] byteBuffer = new byte[sampleBuffer.Length * sizeof(short)];
+    Buffer.BlockCopy(sampleBuffer, 0, byteBuffer, 0, byteBuffer.Length);
+    buffer.AddSamples(byteBuffer, 0, byteBuffer.Length);
+
+    return buffer;
 }

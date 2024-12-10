@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = klerapiano
-build_property.ProjectDir = /home/simp/Code/c#/klerapiano/
+build_property.ProjectDir = /home/shibazaki/Documents/Code/c#/klerapiano/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
